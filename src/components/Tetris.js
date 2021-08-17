@@ -5,6 +5,8 @@ import { StyledTetrisWrapper, StyledTetris } from './styles/StyledTetris';
 import Stage from './Stage';
 import Display from './Display';
 import StartButton from './StartButton';
+import { createStage } from '../gameHelpers';
+
 
 // custom hooks
 import { usePlayer } from '../hooks/userPlayer';
@@ -14,13 +16,48 @@ const Tetris = () => {
     const [dropTime, setDropTIme] = useState(null);
     const [gameOver, setGameOver] = useState(false);
 
-    const [player] = usePlayer();
+    const [player, updatePlayerPos, resetPlayer] = usePlayer();
     const [stage, setStage] = useStage(player);
+
+
+    const movePlayer = dir => {
+        updatePlayerPos({x: dir, y: 0});
+
+    }
+
+    const startGame = () => {
+        // reset everything
+        setStage(createStage());
+        resetPlayer();
+    }
+
+    const drop = () => {
+        updatePlayerPos({x: 0, y: 1, collided: false})
+    }
+
+    const dropPlayer = () => {
+        drop();
+
+    }
+
+    const move = ({keycode}) => {
+        if(!gameOver){
+            if(keycode === 'ArrowDown') {
+                movePlayer(-1);
+            }else if(keycode === 39){
+                movePlayer(1);
+            }else if(keycode === 40) {
+                dropPlayer();
+            }
+        }
+
+    }
+
 
 
 
     return(
-        <StyledTetrisWrapper>
+        <StyledTetrisWrapper role="button" tabIndex="0" onKeyPress={e => move(e)}>
         <StyledTetris>
             <Stage stage={stage} />
             <aside>
@@ -34,7 +71,7 @@ const Tetris = () => {
                     <Display text="Level"></Display>
                 </div>
             )}
-                <StartButton />
+                <StartButton callback={startGame} />
             </aside>
         
         </StyledTetris>
